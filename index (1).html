@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDEAE2">
+<title>Treino AB — Readaptação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EDEAE2;
+    --surface: #FFFFFF;
+    --surface-2: #F5F1E8;
+    --ink: #22201C;
+    --ink-soft: #6B665C;
+    --line: #D9D2C2;
+    --a-color: #3B5B74;
+    --a-tint: #E3ECF1;
+    --b-color: #5C6B3F;
+    --b-tint: #EBEEDF;
+    --done: #6B7F52;
+    --font-display: 'Oswald', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1B1A17;
+      --surface: #262420;
+      --surface-2: #2E2C27;
+      --ink: #EDE9DF;
+      --ink-soft: #A39C8C;
+      --line: #3C392F;
+      --a-tint: #23303A;
+      --b-tint: #262B1E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1B1A17;
+    --surface: #262420;
+    --surface-2: #2E2C27;
+    --ink: #EDE9DF;
+    --ink-soft: #A39C8C;
+    --line: #3C392F;
+    --a-tint: #23303A;
+    --b-tint: #262B1E;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 0;
+  }
+
+  /* Header */
+  header {
+    padding: 8px 0 18px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .kicker {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 0 0 2px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1.05;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  /* Person selector */
+  .people {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 6px;
+  }
+  .person-btn {
+    flex: 1;
+    padding: 12px 10px;
+    border-radius: 10px;
+    border: 2px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .person-btn .role {
+    display: block;
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 1px;
+  }
+  .person-btn.active {
+    border-color: var(--ink);
+    background: var(--surface-2);
+  }
+
+  /* Day tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin: 18px 0 0;
+    border-bottom: 2px solid var(--line);
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 8px 10px;
+    background: none;
+    border: none;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+    border-bottom: 3px solid transparent;
+  }
+  .tab.active { color: var(--ink); }
+  .tab[data-day="A"].active { border-bottom-color: var(--a-color); }
+  .tab[data-day="B"].active { border-bottom-color: var(--b-color); }
+  .tab .sub { display: block; font-family: var(--font-body); font-weight: 400; font-size: 11.5px; margin-top: 1px; }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 4px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 5px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--day-color, var(--a-color));
+    transition: width .35s ease;
+  }
+  .progress-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    text-align: right;
+  }
+
+  /* Exercise list */
+  .day-panel { display: none; margin-top: 6px; }
+  .day-panel.active { display: block; }
+
+  .exercise {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    margin: 12px 0;
+  }
+  .ex-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .ex-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+  }
+  .ex-meta {
+    font-size: 13px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .ex-rest {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .sets {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .set-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid var(--line);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .12s ease;
+    user-select: none;
+  }
+  .set-box.done {
+    background: var(--done);
+    border-color: var(--done);
+    color: #fff;
+  }
+
+  .weight-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .weight-row label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .weight-input {
+    width: 72px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+  }
+  .weight-input:focus {
+    outline: none;
+    border-color: var(--day-color, var(--a-color));
+  }
+  .weight-unit {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .rest-btn {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 13px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .rest-btn.counting {
+    border-color: var(--day-color, var(--a-color));
+    color: var(--day-color, var(--a-color));
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .reset-btn {
+    display: block;
+    margin: 14px auto 0;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 6px;
+  }
+  button, input { -webkit-tap-highlight-color: transparent; }
+  button { touch-action: manipulation; }
+  .set-box { touch-action: manipulation; }
+
+  @media (max-width: 480px) {
+    .wrap { padding-left: 12px; padding-right: 12px; }
+    h1 { font-size: 27px; }
+    .person-btn { padding: 11px 9px; }
+    .exercise { padding: 13px 12px 11px; }
+    .ex-name { font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+  .drive-status {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .drive-status.connected {
+    color: var(--done);
+    font-weight: 600;
+  }
+
+  .drive-status.error {
+    color: #9B3A32;
+    font-weight: 600;
+  }
+
+  .drive-status.loading {
+    opacity: .75;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Volta à academia · readaptação</p>
+    <h1>Treino AB</h1>
+  </header>
+
+  <div class="people" id="people"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0%</span>
+  </div>
+
+  <div id="panels"></div>
+
+  <button class="reset-btn" id="resetBtn">Zerar marcações desta pessoa</button>
+  <button class="reset-btn" id="exportBtn" style="margin-top:6px;">☁️ Enviar treino para o Google Drive</button>
+  <div class="drive-status" id="driveStatus" role="status" aria-live="polite">
+    Google Drive: pronto para envio
+  </div>
+
+  <footer>
+    Toquem em cada quadrado para marcar a série feita. Cada marcação e cada peso digitado ficam registrados automaticamente — usem "Enviar treino para o Google Drive" para atualizar a planilha de acompanhamento. Na 1ª semana, considerem uma série a menos em cada exercício — o objetivo é o corpo reaprender o movimento, não a carga máxima.
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script>
+const DATA = {
+  A: {
+    label: "Superiores",
+    sub: "peito · costas · ombro · braço",
+    color: "var(--a-color)",
+    tint: "var(--a-tint)",
+    exercises: [
+      { name: "Supino reto (barra ou halteres)", sets: 3, reps: "12", rest: 75 },
+      { name: "Remada baixa (cabo) ou curvada", sets: 3, reps: "12", rest: 75 },
+      { name: "Desenvolvimento de ombro (halteres)", sets: 3, reps: "12", rest: 60 },
+      { name: "Puxada frontal (pulley)", sets: 3, reps: "12", rest: 75 },
+      { name: "Rosca direta (barra ou halteres)", sets: 2, reps: "15", rest: 45 },
+      { name: "Tríceps corda (pulley)", sets: 2, reps: "15", rest: 45 },
+    ]
+  },
+  B: {
+    label: "Inferiores + Core",
+    sub: "pernas · glúteo · abdômen",
+    color: "var(--b-color)",
+    tint: "var(--b-tint)",
+    exercises: [
+      { name: "Agachamento livre ou leg press", sets: 3, reps: "12", rest: 90 },
+      { name: "Cadeira extensora", sets: 3, reps: "15", rest: 60 },
+      { name: "Mesa flexora ou stiff", sets: 3, reps: "12", rest: 75 },
+      { name: "Cadeira abdutora/adutora", sets: 2, reps: "15 (cada)", rest: 45 },
+      { name: "Panturrilha em pé", sets: 3, reps: "15", rest: 45 },
+      { name: "Prancha abdominal", sets: 3, reps: "30–40s", rest: 45 },
+    ]
+  }
+};
+
+const PEOPLE = [
+  { id: "p1", name: "Chris" },
+  { id: "p2", name: "Gabe" }
+];
+
+let currentPerson = PEOPLE[0].id;
+let currentDay = "A";
+let restTimers = {};
+
+// GitHub Pages é hospedagem estática: os dados ficam no navegador de cada dispositivo.
+function storageKey(person, day) {
+  return `treinoab:${person}:${day}`;
+}
+
+async function loadState(person, day) {
+  try {
+    const raw = localStorage.getItem(storageKey(person, day));
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+async function saveState(person, day, state) {
+  try {
+    localStorage.setItem(storageKey(person, day), JSON.stringify(state));
+  } catch (e) {
+    console.error('Não foi possível salvar os dados:', e);
+  }
+}
+
+function todayStr() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function personName(id) {
+  const p = PEOPLE.find(p => p.id === id);
+  return p ? p.name : id;
+}
+
+const LOCAL_LOG_KEY = 'treinoab:log';
+
+function getLocalLog() {
+  try {
+    const raw = localStorage.getItem(LOCAL_LOG_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveLocalLogEntry(docId, entry) {
+  try {
+    const log = getLocalLog();
+    log[docId] = entry;
+    localStorage.setItem(LOCAL_LOG_KEY, JSON.stringify(log));
+  } catch (e) {}
+}
+
+// Registra automaticamente, para a planilha, o estado atual de um exercício
+// (peso e séries concluídas hoje) para a pessoa e o treino em questão.
+async function logExercise(person, day, exIdx, state) {
+  const ex = DATA[day].exercises[exIdx];
+  let setsDone = 0;
+  for (let s = 0; s < ex.sets; s++) if (state[`${exIdx}-${s}`]) setsDone++;
+  const weight = state[`weight-${exIdx}`] || '';
+  const date = todayStr();
+  const docId = `${date}_${person}_${day}_${exIdx}`;
+  const entry = {
+    date,
+    person: personName(person),
+    day,
+    exIdx,
+    exercise: ex.name,
+    weight,
+    setsDone,
+    totalSets: ex.sets,
+  };
+
+  // GitHub Pages: o histórico também é salvo localmente no navegador.
+  saveLocalLogEntry(docId, entry);
+}
+
+function renderPeople() {
+  const el = document.getElementById('people');
+  el.innerHTML = '';
+  PEOPLE.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'person-btn' + (p.id === currentPerson ? ' active' : '');
+     btn.setAttribute('aria-pressed', p.id === currentPerson ? 'true' : 'false');
+    btn.innerHTML = `${p.name}<span class="role">${p.id === currentPerson ? 'treinando agora' : 'toque para trocar'}</span>`;
+    btn.onclick = () => { currentPerson = p.id; renderAll(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = '';
+  Object.keys(DATA).forEach(day => {
+    const d = DATA[day];
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (day === currentDay ? ' active' : '');
+     btn.setAttribute('aria-selected', day === currentDay ? 'true' : 'false');
+    btn.dataset.day = day;
+    btn.innerHTML = `Treino ${day}<span class="sub">${d.label}</span>`;
+    btn.onclick = () => { currentDay = day; renderAll(); };
+    el.appendChild(btn);
+  });
+}
+
+async function renderPanel() {
+  const container = document.getElementById('panels');
+  const day = DATA[currentDay];
+  const requestedPerson = currentPerson;
+  const requestedDay = currentDay;
+  const state = await loadState(requestedPerson, requestedDay);
+  // se a pessoa/aba mudou enquanto esperávamos os dados, descarta este resultado
+  if (requestedPerson !== currentPerson || requestedDay !== currentDay) return;
+
+  container.innerHTML = '';
+  document.documentElement.style.setProperty('--day-color', day.color);
+
+  const panel = document.createElement('div');
+  panel.className = 'day-panel active';
+
+  day.exercises.forEach((ex, exIdx) => {
+    const card = document.createElement('div');
+    card.className = 'exercise';
+
+    const head = document.createElement('div');
+    head.className = 'ex-head';
+    head.innerHTML = `<span class="ex-name">${ex.name}</span><span class="ex-meta">${ex.sets}×${ex.reps}</span>`;
+    card.appendChild(head);
+
+    const restLine = document.createElement('div');
+    restLine.className = 'ex-rest';
+    restLine.textContent = `Descanso: ${ex.rest}s entre séries`;
+    card.appendChild(restLine);
+
+    const setsRow = document.createElement('div');
+    setsRow.className = 'sets';
+    for (let s = 0; s < ex.sets; s++) {
+      const box = document.createElement('div');
+      const key = `${exIdx}-${s}`;
+      const isDone = !!state[key];
+      box.className = 'set-box' + (isDone ? ' done' : '');
+      box.textContent = s + 1;
+      box.onclick = async () => {
+        const person = currentPerson, dayId = currentDay;
+        const st = await loadState(person, dayId);
+        st[key] = !st[key];
+        await saveState(person, dayId, st);
+        logExercise(person, dayId, exIdx, st);
+        if (person === currentPerson && dayId === currentDay) {
+          renderPanel();
+          updateProgress();
+        }
+      };
+      setsRow.appendChild(box);
+    }
+    card.appendChild(setsRow);
+
+    const weightRow = document.createElement('div');
+    weightRow.className = 'weight-row';
+    const weightKey = `weight-${exIdx}`;
+    weightRow.innerHTML = `<label for="w-${exIdx}">Peso usado</label>`;
+    const weightInput = document.createElement('input');
+    weightInput.type = 'number';
+    weightInput.inputMode = 'decimal';
+    weightInput.className = 'weight-input';
+    weightInput.id = `w-${exIdx}`;
+    weightInput.placeholder = '—';
+    weightInput.min = '0';
+    weightInput.step = '0.5';
+    weightInput.value = state[weightKey] || '';
+    let weightSaveTimer = null;
+    weightInput.oninput = () => {
+      const person = currentPerson, dayId = currentDay;
+      clearTimeout(weightSaveTimer);
+      weightSaveTimer = setTimeout(async () => {
+        const st = await loadState(person, dayId);
+        st[weightKey] = weightInput.value;
+        await saveState(person, dayId, st);
+        logExercise(person, dayId, exIdx, st);
+      }, 400);
+    };
+    weightRow.appendChild(weightInput);
+    const unit = document.createElement('span');
+    unit.className = 'weight-unit';
+    unit.textContent = 'kg';
+    weightRow.appendChild(unit);
+    card.appendChild(weightRow);
+
+    const restBtn = document.createElement('button');
+    restBtn.className = 'rest-btn';
+    const timerId = `${currentPerson}-${currentDay}-${exIdx}`;
+    restBtn.textContent = `⏱ Descansar ${ex.rest}s`;
+    restBtn.onclick = () => startRest(restBtn, ex.rest, timerId);
+    card.appendChild(restBtn);
+
+    panel.appendChild(card);
+  });
+
+  container.appendChild(panel);
+}
+
+function startRest(btn, seconds, timerId) {
+  if (restTimers[timerId]) {
+    clearInterval(restTimers[timerId]);
+    delete restTimers[timerId];
+  }
+  let remaining = seconds;
+  btn.classList.add('counting');
+  btn.textContent = `${remaining}s restantes`;
+  restTimers[timerId] = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(restTimers[timerId]);
+      delete restTimers[timerId];
+      btn.classList.remove('counting');
+      btn.textContent = `⏱ Descansar ${seconds}s`;
+    } else {
+      btn.textContent = `${remaining}s restantes`;
+    }
+  }, 1000);
+}
+
+async function updateProgress() {
+  const day = DATA[currentDay];
+  const requestedPerson = currentPerson;
+  const requestedDay = currentDay;
+  const state = await loadState(requestedPerson, requestedDay);
+  if (requestedPerson !== currentPerson || requestedDay !== currentDay) return;
+  let total = 0, done = 0;
+  day.exercises.forEach((ex, exIdx) => {
+    for (let s = 0; s < ex.sets; s++) {
+      total++;
+      if (state[`${exIdx}-${s}`]) done++;
+    }
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '%';
+}
+
+function renderAll() {
+  renderPeople();
+  renderTabs();
+  renderPanel();
+  updateProgress();
+}
+
+document.getElementById('resetBtn').onclick = async () => {
+  const person = currentPerson;
+  if (!confirm(`Zerar todas as marcações de ${personName(person)}? O histórico exportável não será apagado.`)) return;
+
+  await Promise.all(Object.keys(DATA).map(day => saveState(person, day, {})));
+
+  Object.keys(restTimers).forEach(timerId => {
+    clearInterval(restTimers[timerId]);
+    delete restTimers[timerId];
+  });
+
+  renderAll();
+};
+
+/*
+ * ============================================================
+ * GOOGLE DRIVE VIA GOOGLE APPS SCRIPT
+ * ============================================================
+ *
+ * O site continua hospedado no GitHub Pages.
+ * Os dados são enviados para um Web App do Google Apps Script,
+ * que grava/atualiza uma planilha Google Sheets dentro da pasta
+ * "Treino AB" no Google Drive.
+ *
+ * Depois de publicar o Apps Script, cole aqui a URL que termina
+ * em /exec.
+ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlt4LTSfFMoLsmZErpOfuZWz34P_6q1R0GGE1sk3-Y06BSVqmgJQ8zFTsLbUywKfwm/exec';
+
+let driveSubmitFrame = null;
+let driveSubmitForm = null;
+let driveSubmitTimeout = null;
+let driveRequestInProgress = false;
+
+function isAppsScriptConfigured() {
+  return APPS_SCRIPT_URL &&
+    !APPS_SCRIPT_URL.startsWith('COLE_AQUI_A_URL') &&
+    APPS_SCRIPT_URL.includes('/exec');
+}
+
+function setDriveStatus(message, type = '') {
+  const el = document.getElementById('driveStatus');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'drive-status' + (type ? ` ${type}` : '');
+}
+
+function createDriveSubmitTarget() {
+  if (driveSubmitFrame && driveSubmitForm) return;
+
+  driveSubmitFrame = document.createElement('iframe');
+  driveSubmitFrame.name = 'treinoAbDriveSubmitFrame';
+  driveSubmitFrame.title = 'Envio do treino';
+  driveSubmitFrame.style.position = 'fixed';
+  driveSubmitFrame.style.width = '1px';
+  driveSubmitFrame.style.height = '1px';
+  driveSubmitFrame.style.opacity = '0';
+  driveSubmitFrame.style.pointerEvents = 'none';
+  driveSubmitFrame.style.border = '0';
+  document.body.appendChild(driveSubmitFrame);
+
+  driveSubmitForm = document.createElement('form');
+  driveSubmitForm.method = 'POST';
+  driveSubmitForm.action = APPS_SCRIPT_URL;
+  driveSubmitForm.target = driveSubmitFrame.name;
+  driveSubmitForm.style.display = 'none';
+
+  const payloadInput = document.createElement('input');
+  payloadInput.type = 'hidden';
+  payloadInput.name = 'payload';
+  payloadInput.id = 'treinoAbPayload';
+  driveSubmitForm.appendChild(payloadInput);
+
+  document.body.appendChild(driveSubmitForm);
+}
+
+function getTrainingPayload() {
+  const rows = Object.values(getLocalLog())
+    .map(r => ({
+      date: r.date || '',
+      person: r.person || '',
+      day: r.day || '',
+      exIdx: Number.isFinite(Number(r.exIdx)) ? Number(r.exIdx) : 0,
+      exercise: r.exercise || '',
+      weight: r.weight === '' || r.weight == null ? '' : Number(r.weight),
+      setsDone: Number(r.setsDone || 0),
+      totalSets: Number(r.totalSets || 0)
+    }))
+    .filter(r => r.date && r.person && r.day && r.exercise);
+
+  if (!rows.length) {
+    throw new Error('Ainda não há nenhuma série ou peso registrado para enviar.');
+  }
+
+  return {
+    version: 1,
+    sentAt: new Date().toISOString(),
+    rows
+  };
+}
+
+function sendTrainingToDrive() {
+  return new Promise((resolve, reject) => {
+    if (!isAppsScriptConfigured()) {
+      reject(new Error('Cole a URL do Web App do Google Apps Script em APPS_SCRIPT_URL no index.html.'));
+      return;
+    }
+
+    createDriveSubmitTarget();
+
+    const payload = getTrainingPayload();
+    const input = document.getElementById('treinoAbPayload');
+    input.value = JSON.stringify(payload);
+
+    const requestId = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    driveRequestInProgress = true;
+
+    const cleanup = () => {
+      window.removeEventListener('message', onMessage);
+      if (driveSubmitTimeout) {
+        clearTimeout(driveSubmitTimeout);
+        driveSubmitTimeout = null;
+      }
+      driveRequestInProgress = false;
+    };
+
+    const onMessage = event => {
+      const data = event.data || {};
+      if (data.type !== 'treinoab-drive-response' || data.requestId !== requestId) return;
+
+      cleanup();
+
+      if (data.ok) {
+        resolve(data);
+      } else {
+        reject(new Error(data.error || 'O Google Apps Script não conseguiu salvar a planilha.'));
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+
+    driveSubmitTimeout = setTimeout(() => {
+      cleanup();
+      reject(new Error(
+        'O envio demorou mais que o esperado. Verifique se o Web App do Apps Script está publicado e acessível.'
+      ));
+    }, 30000);
+
+    input.value = JSON.stringify({ ...payload, requestId });
+    driveSubmitForm.submit();
+  });
+}
+
+document.getElementById('exportBtn').onclick = async () => {
+  const btn = document.getElementById('exportBtn');
+  const originalText = btn.textContent;
+
+  if (driveRequestInProgress) return;
+
+  btn.disabled = true;
+  btn.textContent = '☁️ Enviando...';
+
+  try {
+    setDriveStatus('Preparando dados do treino...', 'loading');
+
+    const result = await sendTrainingToDrive();
+
+    setDriveStatus('✓ Treino atualizado no Google Drive.', 'connected');
+
+    if (result.url) {
+      setTimeout(() => {
+        if (confirm('Treino salvo com sucesso. Deseja abrir a planilha no Google Drive?')) {
+          window.open(result.url, '_blank', 'noopener,noreferrer');
+        }
+      }, 100);
+    }
+  } catch (error) {
+    console.error('Google Apps Script:', error);
+    setDriveStatus(error.message || 'Não foi possível enviar o treino.', 'error');
+    alert(error.message || 'Não foi possível enviar o treino para o Google Drive.');
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
+renderAll();
+</script>
+</body>
+</html>
